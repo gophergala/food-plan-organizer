@@ -21,11 +21,11 @@ We're using [atom-shell](https://github.com/atom/atom-shell) to wrap parts 2 & 3
 - UI
 - Tests
 
-## Commands
 
-Need to be moved into makefile
+## API Examples
 
+Run `make server` first.
 
 ```
-go run cmd/serve/main.go
+curl "http://127.0.0.1:8080/search/food/?q=Coconut%20Curry"
 ```

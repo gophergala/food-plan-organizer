@@ -15,8 +15,8 @@ import (
 	"golang.org/x/text/transform"
 
 	"github.com/cznic/ql"
-	"github.com/nicolai86/sr27/cmd/parse/etl"
-	"github.com/nicolai86/sr27/models"
+	"github.com/gophergala/food-plan-organizer/cmd/parse/etl"
+	"github.com/gophergala/food-plan-organizer/models"
 )
 import "flag"
 

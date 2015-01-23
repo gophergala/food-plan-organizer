@@ -32,6 +32,15 @@ var CreateFoodTableSQLs = []string{`
 	`CREATE INDEX foods_food_group_idx ON foods (food_group_id);`,
 }
 
+func ScanFood(s StructScanner) (Food, error) {
+	var f Food
+	var err = s.Scan(&f.ID, &f.FoodGroupID, &f.Name, &f.ShortName, &f.CommonName, &f.ScientificName, &f.NitrogenFactor, &f.ProteinFactor, &f.FatFactor, &f.CarbonhydrateFactor)
+	if err != nil {
+		return f, err
+	}
+	return f, nil
+}
+
 func InsertFood(f *Food, tx *sql.Tx) error {
 	if _, err := tx.Exec(`INSERT INTO foods VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);`, f.ID, f.FoodGroupID, f.Name, f.ShortName, f.CommonName, f.ScientificName, f.NitrogenFactor, f.ProteinFactor, f.FatFactor, f.CarbonhydrateFactor); err != nil {
 		return err

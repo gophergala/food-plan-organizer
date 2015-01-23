@@ -5,3 +5,6 @@ download:
 
 database:
 	go run cmd/parse/main.go -data.dir data -database default.db
+
+server:
+	go run cmd/serve/main.go -database default.db
