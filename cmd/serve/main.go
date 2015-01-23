@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/cznic/ql"
 	"github.com/gophergala/food-plan-organizer/cmd/serve/search"
+	"github.com/gophergala/food-plan-organizer/cmd/serve/show"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
@@ -18,7 +19,8 @@ var (
 
 func newServer(db *sql.DB) http.Handler {
 	var r = http.NewServeMux()
-	r.Handle("/search/food/", search.NewSearchServer(db))
+	r.Handle("/search/food/", search.NewFoodSearchServer(db))
+	r.Handle("/food/", show.NewFoodShowServer(db))
 	return logHandler(jsonHandler(r))
 }
 
@@ -45,8 +47,7 @@ func jsonHandler(next http.Handler) http.HandlerFunc {
 func main() {
 	flag.Parse()
 
-	ql.RegisterDriver()
-	var db, err = sql.Open("ql", *database)
+	var db, err = sql.Open("sqlite3", *database)
 	if err != nil {
 		log.Fatalf("Failed to open database: %v\n", err)
 	}

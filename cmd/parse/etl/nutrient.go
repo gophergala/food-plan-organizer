@@ -3,7 +3,6 @@ package etl
 import (
 	"fmt"
 	"io"
-	"strconv"
 )
 
 // Nutrient Data File (file name = NUT_DATA).
@@ -54,24 +53,15 @@ func parseNutrient(r *SR27Reader) (Nutrient, error) {
 		return Nutrient{}, err
 	}
 
-	var parseFloat = func(s string) float32 {
-		var f, _ = strconv.ParseFloat(s, 32)
-		return float32(f)
-	}
-	var parseInt = func(s string) int32 {
-		var i, _ = strconv.ParseInt(s, 10, 32)
-		return int32(i)
-	}
-
 	var n = Nutrient{
 		FoodID:           s[0],
 		NutrientID:       s[1],
-		NutritionValue:   parseFloat(s[2]),
-		Min:              parseFloat(s[10]),
-		Max:              parseFloat(s[11]),
-		DegreesOfFreedom: parseInt(s[12]),
-		LowerErrorBound:  parseFloat(s[13]),
-		UpperErrorBound:  parseFloat(s[14]),
+		NutritionValue:   parseFloat32(s[2]),
+		Min:              parseFloat32(s[10]),
+		Max:              parseFloat32(s[11]),
+		DegreesOfFreedom: parseInt32(s[12]),
+		LowerErrorBound:  parseFloat32(s[13]),
+		UpperErrorBound:  parseFloat32(s[14]),
 	}
 	return n, nil
 }

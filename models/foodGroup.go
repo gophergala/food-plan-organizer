@@ -9,14 +9,14 @@ type FoodGroup struct {
 
 var CreateFoodGroupTableSQLs = []string{`
   CREATE TABLE food_groups (
-    id   string,
-    name string
+    id   text,
+    name text
   );`,
 	`CREATE INDEX food_groups_idx ON food_groups (id);`,
 }
 
-func InsertFoodGroup(fg *FoodGroup, tx *sql.Tx) error {
-	if _, err := tx.Exec(`INSERT INTO food_groups VALUES ($1, $2);`, fg.ID, fg.Name); err != nil {
+func InsertFoodGroup(fg *FoodGroup, tx *sql.DB) error {
+	if _, err := tx.Exec(`INSERT INTO food_groups VALUES ($1,$2);`, fg.ID, fg.Name); err != nil {
 		return err
 	}
 	return nil

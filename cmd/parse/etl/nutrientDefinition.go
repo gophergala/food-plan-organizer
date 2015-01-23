@@ -3,7 +3,6 @@ package etl
 import (
 	"fmt"
 	"io"
-	"strconv"
 )
 
 // Nutrient Definition File (file name = NUTR_DEF).
@@ -33,17 +32,12 @@ func parseNutrientDefinition(r *SR27Reader) (NutrientDefinition, error) {
 		return NutrientDefinition{}, err
 	}
 
-	var parseInt = func(s string) int32 {
-		var i, _ = strconv.ParseInt(s, 10, 32)
-		return int32(i)
-	}
-
 	var nd = NutrientDefinition{
 		NutrientID:    s[0],
 		Units:         s[1],
 		Tagname:       s[2],
 		Description:   s[3],
-		DecimalPlaces: parseInt(s[4]),
+		DecimalPlaces: parseInt32(s[4]),
 	}
 	return nd, nil
 }

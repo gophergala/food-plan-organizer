@@ -7,16 +7,14 @@ import (
 	"log"
 	"os"
 	"path"
-	"runtime"
-	"sync"
 
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
 
-	"github.com/cznic/ql"
 	"github.com/gophergala/food-plan-organizer/cmd/parse/etl"
 	"github.com/gophergala/food-plan-organizer/models"
+	_ "github.com/mattn/go-sqlite3"
 )
 import "flag"
 
@@ -25,9 +23,9 @@ var (
 	database      = flag.String("database", "", "path to database file")
 )
 
-type Handler func(interface{}, *sql.Tx)
+type Handler func(interface{}, *sql.DB)
 
-func persistFood(i interface{}, tx *sql.Tx) {
+func persistFood(i interface{}, tx *sql.DB) {
 	if fo, ok := i.(etl.Food); ok {
 		var dbFood = models.Food{
 			ID:                  fo.ID,
@@ -49,7 +47,7 @@ func persistFood(i interface{}, tx *sql.Tx) {
 	}
 }
 
-func persistFoodGroup(i interface{}, tx *sql.Tx) {
+func persistFoodGroup(i interface{}, tx *sql.DB) {
 	if fg, ok := i.(etl.FoodGroup); ok {
 		var dbGroup = models.FoodGroup{
 			ID:   fg.GroupID,
@@ -63,7 +61,7 @@ func persistFoodGroup(i interface{}, tx *sql.Tx) {
 	}
 }
 
-func persistLangDescription(i interface{}, tx *sql.Tx) {
+func persistLangDescription(i interface{}, tx *sql.DB) {
 	if ld, ok := i.(etl.LanguageDescription); ok {
 		var dbLangDesc = models.LanguageDescription{
 			Code:        ld.FactorCode,
@@ -77,7 +75,7 @@ func persistLangDescription(i interface{}, tx *sql.Tx) {
 	}
 }
 
-func persistLang(i interface{}, tx *sql.Tx) {
+func persistLang(i interface{}, tx *sql.DB) {
 	if l, ok := i.(etl.Lang); ok {
 		var dbL = models.Language{
 			NutrientID: l.NutrientID,
@@ -91,7 +89,7 @@ func persistLang(i interface{}, tx *sql.Tx) {
 	}
 }
 
-func persistWeight(i interface{}, tx *sql.Tx) {
+func persistWeight(i interface{}, tx *sql.DB) {
 	if w, ok := i.(etl.Weight); ok {
 		var dbW = models.Weight{
 			NutrientID:  w.NutrientID,
@@ -108,7 +106,7 @@ func persistWeight(i interface{}, tx *sql.Tx) {
 	}
 }
 
-func persistNutrientDefinitions(i interface{}, tx *sql.Tx) {
+func persistNutrientDefinitions(i interface{}, tx *sql.DB) {
 	if nd, ok := i.(etl.NutrientDefinition); ok {
 		var dbND = models.NutrientDefinition{
 			NutrientID:    nd.NutrientID,
@@ -125,7 +123,7 @@ func persistNutrientDefinitions(i interface{}, tx *sql.Tx) {
 	}
 }
 
-func persistNutrient(i interface{}, tx *sql.Tx) {
+func persistNutrient(i interface{}, tx *sql.DB) {
 	if n, ok := i.(etl.Nutrient); ok {
 		var dbN = models.Nutrient{
 			FoodID:           n.FoodID,
@@ -219,7 +217,7 @@ var files = []file{
 	},
 }
 
-func runTx(tx *sql.Tx, sql string) {
+func runTx(tx *sql.DB, sql string) {
 	if _, err := tx.Exec(sql); err != nil {
 		log.Fatalf("Error executing '%v': %v", sql, err)
 	}
@@ -228,32 +226,26 @@ func runTx(tx *sql.Tx, sql string) {
 var db *sql.DB
 
 func setupDB(db *sql.DB) {
-	var tx, err = db.Begin()
-	defer tx.Commit()
-
-	if err != nil {
-		log.Fatalf("Failed to open the transaction: %v\n", err)
-	}
 	for _, sql := range models.CreateFoodGroupTableSQLs {
-		runTx(tx, sql)
+		runTx(db, sql)
 	}
 	for _, sql := range models.CreateFoodTableSQLs {
-		runTx(tx, sql)
+		runTx(db, sql)
 	}
 	for _, sql := range models.CreateLanguageDescriptionTableSQLs {
-		runTx(tx, sql)
+		runTx(db, sql)
 	}
 	for _, sql := range models.CreateLanguageTableSQLs {
-		runTx(tx, sql)
+		runTx(db, sql)
 	}
 	for _, sql := range models.CreateWeightTableSQLs {
-		runTx(tx, sql)
+		runTx(db, sql)
 	}
 	for _, sql := range models.CreateNutrientDefinitionTableSQLs {
-		runTx(tx, sql)
+		runTx(db, sql)
 	}
 	for _, sql := range models.CreateNutrientTableSQLs {
-		runTx(tx, sql)
+		runTx(db, sql)
 	}
 }
 
@@ -273,9 +265,9 @@ func main() {
 		os.Remove(*database)
 	}
 
-	ql.RegisterDriver()
 	var err error
-	db, err = sql.Open("ql", *database)
+	db, err = sql.Open("sqlite3", *database)
+	db.SetMaxOpenConns(10)
 	if err != nil {
 		fmt.Printf("Failed opening database: %v\n", err)
 		os.Exit(1)
@@ -294,38 +286,30 @@ func main() {
 		}
 	}
 
-	var wait = sync.WaitGroup{}
 	for _, fi := range files {
 		if fi.Extractor != nil {
-			wait.Add(1)
-			go func(fi file) {
-				var f, _ = os.Open(path.Join(*dataDirectory, "/", fi.Name))
 
-				var r io.Reader = f
-				if fi.Encoding != nil {
-					r = transform.NewReader(r, (*fi.Encoding).NewDecoder())
-				}
+			var f, _ = os.Open(path.Join(*dataDirectory, "/", fi.Name))
 
-				var ch = make(chan interface{})
-				for k := 0; k < runtime.GOMAXPROCS(0)*2; k++ {
-					go func(h Handler) {
-						var tx, err = db.Begin()
-						if err != nil {
-							panic(err)
-						}
-						for i := range ch {
-							h(i, tx)
-						}
-						tx.Commit()
-					}(fi.h)
-				}
+			var r io.Reader = f
+			if fi.Encoding != nil {
+				r = transform.NewReader(r, (*fi.Encoding).NewDecoder())
+			}
+
+			var ch = make(chan interface{})
+			go func() {
 				if err := fi.Extractor.Parse(r, ch); err != nil {
 					fmt.Printf("Failed to extract %v: %v\n", fi.Description, err)
 				}
 				close(ch)
-				wait.Done()
-			}(fi)
+				fmt.Printf("closed")
+			}()
+
+			for i := range ch {
+				fi.h(i, db)
+			}
+
 		}
 	}
-	wait.Wait()
+
 }

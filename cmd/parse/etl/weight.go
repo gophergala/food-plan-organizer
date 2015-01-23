@@ -3,7 +3,6 @@ package etl
 import (
 	"fmt"
 	"io"
-	"strconv"
 )
 
 // Weight File (file name = WEIGHT).
@@ -35,17 +34,12 @@ func parseWeight(r *SR27Reader) (Weight, error) {
 		return Weight{}, err
 	}
 
-	var parse = func(s string) float32 {
-		var f, _ = strconv.ParseFloat(s, 32)
-		return float32(f)
-	}
-
 	var w = Weight{
 		NutrientID:  s[0],
 		Seq:         s[1],
-		Amount:      parse(s[2]),
+		Amount:      parseFloat32(s[2]),
 		Description: s[3],
-		GramWeight:  parse(s[4]),
+		GramWeight:  parseFloat32(s[4]),
 	}
 	return w, nil
 }

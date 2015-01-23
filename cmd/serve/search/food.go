@@ -3,6 +3,7 @@ package search
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -22,7 +23,7 @@ func (s searchServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	rows, err := s.DB.Query(`SELECT * FROM foods WHERE name LIKE $1 OR short_name LIKE $1 OR common_name LIKE $1 OR scientific_name LIKE $1`, query[0])
+	rows, err := s.DB.Query(`SELECT * FROM foods WHERE name LIKE $1 OR short_name LIKE $1 OR common_name LIKE $1 OR scientific_name LIKE $1`, fmt.Sprintf("%%%v%%", query[0]))
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
@@ -44,7 +45,7 @@ func (s searchServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	enc.Encode(foods)
 }
 
-func NewSearchServer(db *sql.DB) http.Handler {
+func NewFoodSearchServer(db *sql.DB) http.Handler {
 	return searchServer{
 		DB: db,
 	}

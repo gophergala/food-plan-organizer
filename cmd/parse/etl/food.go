@@ -3,7 +3,6 @@ package etl
 import (
 	"fmt"
 	"io"
-	"strconv"
 )
 
 // Food Description File (file name = FOOD_DES).
@@ -53,11 +52,6 @@ func parseFood(r *SR27Reader) (Food, error) {
 		return Food{}, err
 	}
 
-	var parse = func(s string) float32 {
-		var f, _ = strconv.ParseFloat(s, 32)
-		return float32(f)
-	}
-
 	var f = Food{
 		ID:                 s[0],
 		FoodGroupID:        s[1],
@@ -65,10 +59,10 @@ func parseFood(r *SR27Reader) (Food, error) {
 		ShortName:          s[3],
 		CommonName:         s[4],
 		ScientificName:     s[9],
-		NitrogenFactor:     parse(s[10]),
-		ProteinFactor:      parse(s[11]),
-		FatFactor:          parse(s[12]),
-		CarbohydrateFactor: parse(s[13]),
+		NitrogenFactor:     parseFloat32(s[10]),
+		ProteinFactor:      parseFloat32(s[11]),
+		FatFactor:          parseFloat32(s[12]),
+		CarbohydrateFactor: parseFloat32(s[13]),
 	}
 	return f, nil
 }

@@ -3,10 +3,21 @@ package etl
 import (
 	"encoding/csv"
 	"io"
+	"strconv"
 )
 
 type Extract interface {
 	Parse(io.Reader, chan<- interface{}) error
+}
+
+func parseFloat32(s string) float32 {
+	var f, _ = strconv.ParseFloat(s, 32)
+	return float32(f)
+}
+
+func parseInt32(s string) int32 {
+	var i, _ = strconv.ParseInt(s, 10, 32)
+	return int32(i)
 }
 
 // SR27Reader wraps a CSV Reader, configurierung it to the CSV encoding standard
