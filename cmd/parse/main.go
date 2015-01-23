@@ -12,6 +12,7 @@ import (
 
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/transform"
 
 	"github.com/cznic/ql"
 	"github.com/nicolai86/sr27/cmd/parse/etl"
@@ -302,6 +303,7 @@ func main() {
 
 				var r io.Reader = f
 				if fi.Encoding != nil {
+					r = transform.NewReader(r, (*fi.Encoding).NewDecoder())
 				}
 
 				var ch = make(chan interface{})
