@@ -25,6 +25,7 @@ We're using [atom-shell](https://github.com/atom/atom-shell) to wrap parts 2 & 3
 
 Need to be moved into makefile
 
+
 ```
 go run cmd/serve/main.go
 ```
