@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	_ "github.com/gophergala/food-plan-organizer/_third_party/github.com/mattn/go-sqlite3"
 	"github.com/gophergala/food-plan-organizer/cmd/serve/search"
 	"github.com/gophergala/food-plan-organizer/cmd/serve/show"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
