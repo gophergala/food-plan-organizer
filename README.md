@@ -17,10 +17,10 @@ We're using [atom-shell](https://github.com/atom/atom-shell) to wrap parts 2 & 3
 ## TODOs
 
 - Makefile to generate atom-shell
-- non-SR27 data storage
-- UI
 - replace custom migrations by sql-migrate
 - Tests
+- Databases need to be split up, since ETL provided data does not change and thus it can be bundled with the application.
+  User data needs to persisted elsewhere
 
 
 ## API Examples
