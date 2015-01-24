@@ -5,6 +5,7 @@
       <input type="text" class="form-control" id="inputRecipeName" placeholder="recipe name" ng-model="recipe.name">
     </div>
   </div>
+
   <div class="form-group">
     <label class="col-sm-2 control-label">Ingredients</label>
     <div class="col-sm-10">
@@ -31,12 +32,12 @@
             <td ng-bind="ingredient.name"></td>
             <td>
               <select ng-model="ingredient.unit">
-                <option id="piece">piece</option>
-                <option id="g">gram</option>
-                <option id="cup">cup (292g)</option>
-                <option id="tbsp">tbsp (18g)</option>
-                <option id="tsp">tsp (6g)</option>
-                <option id="ml">ml</option>
+                <option value="piece">piece</option>
+                <option value="g">gram</option>
+                <option value="cup">cup (292g)</option>
+                <option value="tbsp">tbsp (18g)</option>
+                <option value="tsp">tsp (6g)</option>
+                <option value="ml">ml</option>
               </select>
             </td>
             <td>
@@ -50,12 +51,26 @@
       </table>
     </div>
   </div>
+
   <div class="form-group">
     <label for="inputRecipeDescription" class="col-sm-2 control-label">Description</label>
     <div class="col-sm-10">
       <textarea class="form-control" id="inputRecipeDescription" placeholder="recipe preparations, steps" ng-model="recipe.description" rows="5"></textarea>
     </div>
   </div>
+
+  <div class="form-group">
+    <label class="col-sm-2 control-label">Nutrition</label>
+    <div class="col-sm-10">
+      <ul>
+        <li ng-repeat="nutrient in nutrients">
+          <span ng-bind="nutrient.description"></span>
+          ∑ <span ng-bind="totalNutrients(recipe, nutrients, nutrient.id)|number:3"></span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
       <button type="submit" class="btn btn-primary">Save</button>

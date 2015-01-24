@@ -35,6 +35,43 @@ var ingredientHandling = function ingredientHandling($scope) {
   };
 };
 
+var totalNutrients = function(recipe, nutrients, nutrientId) {
+  var nutrient = null;
+  for (var k = 0; k < nutrients.length; k++) {
+    if (nutrients[k].id === nutrientId) {
+      nutrient = nutrients[k];
+    }
+  }
+
+  var total = 0.0;
+  for (var i = 0; i < recipe.ingredients.length; i++) {
+    var ingredient = recipe.ingredients[i];
+    var multipler = 1;
+
+    if (ingredient.unit === 'piece') {
+      multipler = ingredient.volume;
+    } else if (ingredient.unit === 'g') {
+      if (nutrient.unit === 'g') {
+        multipler = ingredient.volume;
+      } else if (nutrient.unit === 'mg') {
+        multipler = ingredient.volume / 1000.0;
+      } else if (nutrient.unit === 'µg') {
+        multipler = ingredient.volume / 1000.0 / 1000.0;
+      } else {
+        multipler = -1;
+      }
+    }
+    // console.log(ingredient);
+    for (var j = 0; j < ingredient.nutrients.length; j++) {
+      var nutrient = ingredient.nutrients[j];
+      if (nutrient.id === nutrientId) {
+        total = total + (nutrient.nutrient_value * multipler);
+      }
+    }
+  }
+  return total;
+};
+
 angular.module('foodPlanOrganizerApp')
 .directive('float', function() {
   return {
@@ -46,15 +83,6 @@ angular.module('foodPlanOrganizerApp')
     }
   };
 })
-.factory('Recipe', ['$resource', function($resource) {
-    return $resource('http://localhost:8080/recipes/', {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      }
-    });
-  }])
 .controller('RecipesCtrl', function($scope, Recipe) {
   $scope.recipes = Recipe.query();
 
@@ -66,10 +94,12 @@ angular.module('foodPlanOrganizerApp')
     });
   };
 })
-.controller('EditRecipeCtrl', function($scope, $routeParams, $location, Recipe) {
+.controller('EditRecipeCtrl', function($scope, $routeParams, $location, Recipe, Nutrient) {
   $scope.recipe = Recipe.get({
     id: $routeParams.id
   });
+  $scope.nutrients = Nutrient.query();
+  $scope.totalNutrients = totalNutrients;
   ingredientHandling($scope);
 
   $scope.submit = function() {
@@ -78,8 +108,10 @@ angular.module('foodPlanOrganizerApp')
     });
   };
 })
-.controller('NewRecipeCtrl', function($scope, $location, Recipe) {
+.controller('NewRecipeCtrl', function($scope, $location, Recipe, Nutrient) {
   $scope.recipe = {};
+  $scope.nutrients = Nutrient.query();
+  $scope.totalNutrients = totalNutrients;
   ingredientHandling($scope);
 
   $scope.submit = function() {
