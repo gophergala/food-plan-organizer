@@ -3,13 +3,13 @@ package models
 import "database/sql"
 
 type FoodGroup struct {
-	ID   string
-	Name string
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
 }
 
 var CreateFoodGroupTableSQLs = []string{`
   CREATE TABLE food_groups (
-    id   text,
+    id   integer,
     name text
   );`,
 	`CREATE INDEX food_groups_idx ON food_groups (id);`,

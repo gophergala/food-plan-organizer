@@ -15,7 +15,7 @@ import (
 // FdGrp_Desc  A 60  Name of food group
 
 type FoodGroup struct {
-	GroupID string
+	GroupID int32
 	Name    string
 }
 
@@ -26,7 +26,7 @@ func parseFoodGroup(r *SR27Reader) (FoodGroup, error) {
 	}
 
 	var fg = FoodGroup{
-		GroupID: s[0],
+		GroupID: parseInt32(s[0]),
 		Name:    s[1],
 	}
 	return fg, nil
@@ -42,7 +42,7 @@ func (fge FoodGroupExtractor) Parse(r io.Reader, parsed chan<- interface{}) erro
 	for {
 		var group, err = parseFoodGroup(sr27)
 
-		if group.GroupID != "" {
+		if group.GroupID != 0 {
 			parsed <- group
 		}
 

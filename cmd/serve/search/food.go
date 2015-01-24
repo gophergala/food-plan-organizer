@@ -23,8 +23,9 @@ func (s searchServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	rows, err := s.DB.Query(`SELECT * FROM foods WHERE name LIKE $1 OR short_name LIKE $1 OR common_name LIKE $1 OR scientific_name LIKE $1`, fmt.Sprintf("%%%v%%", query[0]))
+	rows, err := s.DB.Query(`SELECT foods.*, food_groups.* FROM foods INNER JOIN food_groups ON food_groups.id = foods.food_group_id WHERE foods.name LIKE $1 OR short_name LIKE $1 OR common_name LIKE $1 OR scientific_name LIKE $1`, fmt.Sprintf("%%%v%%", query[0]))
 	if err != nil {
+		fmt.Printf("err: %v\n", err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}

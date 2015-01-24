@@ -21,7 +21,7 @@ import (
 // Std_Dev        N 7.3    Standard deviation.
 
 type Weight struct {
-	NutrientID  string
+	NutrientID  int32
 	Seq         string
 	Amount      float32
 	Description string
@@ -35,7 +35,7 @@ func parseWeight(r *SR27Reader) (Weight, error) {
 	}
 
 	var w = Weight{
-		NutrientID:  s[0],
+		NutrientID:  parseInt32(s[0]),
 		Seq:         s[1],
 		Amount:      parseFloat32(s[2]),
 		Description: s[3],
@@ -56,7 +56,7 @@ func (we WeightExtractor) Parse(r io.Reader, parsed chan<- interface{}) error {
 		if err == io.EOF {
 			break
 		}
-		if w.NutrientID != "" {
+		if w.NutrientID != 0 {
 			parsed <- w
 		}
 		if err != nil {

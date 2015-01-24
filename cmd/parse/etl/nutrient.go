@@ -37,8 +37,8 @@ import (
 // CC             A 1     Confidence Code indicating data quality, based on evaluation of sample plan, sample handling, analytical method, analytical quality control, and number of samples analyzed
 
 type Nutrient struct {
-	FoodID           string
-	NutrientID       string
+	FoodID           int32
+	NutrientID       int32
 	NutritionValue   float32
 	Min              float32
 	Max              float32
@@ -54,8 +54,8 @@ func parseNutrient(r *SR27Reader) (Nutrient, error) {
 	}
 
 	var n = Nutrient{
-		FoodID:           s[0],
-		NutrientID:       s[1],
+		FoodID:           parseInt32(s[0]),
+		NutrientID:       parseInt32(s[1]),
 		NutritionValue:   parseFloat32(s[2]),
 		Min:              parseFloat32(s[10]),
 		Max:              parseFloat32(s[11]),
@@ -78,7 +78,7 @@ func (ne NutrientExtractor) Parse(r io.Reader, parsed chan<- interface{}) error 
 		if err == io.EOF {
 			break
 		}
-		if n.NutrientID != "" {
+		if n.NutrientID != 0 {
 			parsed <- n
 		}
 		if err != nil {

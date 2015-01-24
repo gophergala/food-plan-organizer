@@ -3,16 +3,16 @@ package models
 import "database/sql"
 
 type NutrientDefinition struct {
-	NutrientID    string
-	Units         string
-	Tagname       string
-	Description   string
-	DecimalPlaces int32
+	NutrientID    int32  `json:"-"`
+	Units         string `json:"unit"`
+	Tagname       string `json:"tagname"`
+	Description   string `json:"description"`
+	DecimalPlaces int32  `json:"decimal_places"`
 }
 
 var CreateNutrientDefinitionTableSQLs = []string{`
   CREATE TABLE nutrient_definitions (
-    nutrient_id    TEXT,
+    nutrient_id    integer,
     units          TEXT,
     tagname        TEXT,
     description    TEXT,

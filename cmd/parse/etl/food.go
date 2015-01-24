@@ -34,8 +34,8 @@ import (
 // CHO_Factor  N 4.2  Factor for calculating calories from carbohydrate
 
 type Food struct {
-	ID                 string
-	FoodGroupID        string
+	ID                 int32
+	FoodGroupID        int32
 	Name               string
 	ShortName          string
 	CommonName         string
@@ -53,8 +53,8 @@ func parseFood(r *SR27Reader) (Food, error) {
 	}
 
 	var f = Food{
-		ID:                 s[0],
-		FoodGroupID:        s[1],
+		ID:                 parseInt32(s[0]),
+		FoodGroupID:        parseInt32(s[1]),
 		Name:               s[2],
 		ShortName:          s[3],
 		CommonName:         s[4],
@@ -77,7 +77,7 @@ func (fe FoodExtractor) Parse(r io.Reader, parsed chan<- interface{}) error {
 	var rows = 0
 	for {
 		var food, err = parseFood(sr27)
-		if food.ID != "" {
+		if food.ID != 0 {
 			parsed <- food
 		}
 		if err == io.EOF {

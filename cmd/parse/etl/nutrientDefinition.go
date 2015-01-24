@@ -19,7 +19,7 @@ import (
 // SR_Order  N 6   Used to sort nutrient records in the same order as various reports produced from SR.
 
 type NutrientDefinition struct {
-	NutrientID    string
+	NutrientID    int32
 	Units         string
 	Tagname       string
 	Description   string
@@ -33,7 +33,7 @@ func parseNutrientDefinition(r *SR27Reader) (NutrientDefinition, error) {
 	}
 
 	var nd = NutrientDefinition{
-		NutrientID:    s[0],
+		NutrientID:    parseInt32(s[0]),
 		Units:         s[1],
 		Tagname:       s[2],
 		Description:   s[3],
@@ -54,7 +54,7 @@ func (nde NutrientDefinitionExtractor) Parse(r io.Reader, parsed chan<- interfac
 		if err == io.EOF {
 			break
 		}
-		if nd.NutrientID != "" {
+		if nd.NutrientID != 0 {
 			parsed <- nd
 		}
 		if err != nil {

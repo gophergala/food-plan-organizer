@@ -15,9 +15,8 @@ type showServer struct {
 }
 
 func loadNutrients(f *models.Food, DB *sql.DB) ([]models.Nutrient, error) {
-	rows, err := DB.Query(`SELECT * FROM nutrients INNER JOIN nutrient_definitions ON nutrient_definitions.nutrient_id = nutrients.nutrient_id WHERE food_id == $1 AND nutrient_value > 0`, f.ID)
+	rows, err := DB.Query(`SELECT * FROM nutrients INNER JOIN nutrient_definitions ON nutrient_definitions.nutrient_id = nutrients.nutrient_id WHERE food_id = $1 AND nutrient_value > 0`, f.ID)
 	if err != nil {
-		fmt.Printf("err: %v\n", err)
 		return nil, err
 	}
 
@@ -44,7 +43,7 @@ func (s showServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var row = s.DB.QueryRow(`SELECT * FROM foods WHERE id == $1`, id[0])
+	var row = s.DB.QueryRow(`SELECT foods.*, food_groups.* FROM foods INNER JOIN food_groups ON food_groups.id = foods.food_group_id WHERE foods.id = $1`, id[0])
 
 	var food models.Food
 	var err error

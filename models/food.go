@@ -3,23 +3,24 @@ package models
 import "database/sql"
 
 type Food struct {
-	ID                  string
-	FoodGroupID         string
-	Name                string
-	ShortName           string
-	CommonName          string
-	ScientificName      string
-	NitrogenFactor      float32
-	ProteinFactor       float32
-	FatFactor           float32
-	CarbonhydrateFactor float32
-	Nutrients           []Nutrient
+	ID                  int32      `json:"id"`
+	FoodGroupID         int32      `json:"-"`
+	Group               FoodGroup  `json:"food_group"`
+	Name                string     `json:"name"`
+	ShortName           string     `json:"short_name"`
+	CommonName          string     `json:"common_name"`
+	ScientificName      string     `json:"scientific_name"`
+	NitrogenFactor      float32    `json:"nitrogen_factor"`
+	ProteinFactor       float32    `json:"protein_factor"`
+	FatFactor           float32    `json:"fat_factor"`
+	CarbonhydrateFactor float32    `json:"carbonhydrate_factor"`
+	Nutrients           []Nutrient `json:"nutrients,omitempty"`
 }
 
 var CreateFoodTableSQLs = []string{`
   CREATE TABLE foods (
-    id                   text,
-    food_group_id        text,
+    id                   integer,
+    food_group_id        integer,
     name                 text,
     short_name           text,
     common_name          text,
@@ -39,7 +40,7 @@ var CreateFoodTableSQLs = []string{`
 
 func ScanFood(s StructScanner) (Food, error) {
 	var f Food
-	var err = s.Scan(&f.ID, &f.FoodGroupID, &f.Name, &f.ShortName, &f.CommonName, &f.ScientificName, &f.NitrogenFactor, &f.ProteinFactor, &f.FatFactor, &f.CarbonhydrateFactor)
+	var err = s.Scan(&f.ID, &f.FoodGroupID, &f.Name, &f.ShortName, &f.CommonName, &f.ScientificName, &f.NitrogenFactor, &f.ProteinFactor, &f.FatFactor, &f.CarbonhydrateFactor, &f.Group.ID, &f.Group.Name)
 	if err != nil {
 		return f, err
 	}

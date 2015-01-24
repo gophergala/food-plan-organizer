@@ -3,7 +3,7 @@ package models
 import "database/sql"
 
 type Weight struct {
-	NutrientID  string
+	NutrientID  int32
 	Seq         string
 	Amount      float32
 	Description string
@@ -12,7 +12,7 @@ type Weight struct {
 
 var CreateWeightTableSQLs = []string{`
   CREATE TABLE weights (
-    nutrient_id text,
+    nutrient_id integer,
     seq         text,
     amount      real,
     description text,

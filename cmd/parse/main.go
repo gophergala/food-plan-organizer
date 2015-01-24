@@ -302,7 +302,6 @@ func main() {
 					fmt.Printf("Failed to extract %v: %v\n", fi.Description, err)
 				}
 				close(ch)
-				fmt.Printf("closed")
 			}()
 
 			for i := range ch {

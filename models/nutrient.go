@@ -3,21 +3,21 @@ package models
 import "database/sql"
 
 type Nutrient struct {
-	FoodID           string
-	NutrientID       string
-	NutritionValue   float32
-	Min              float32
-	Max              float32
-	DegreesOfFreedom int32
-	LowerErrorBound  float32
-	UpperErrorBound  float32
+	FoodID           int32   `json:"-"`
+	NutrientID       int32   `json:"nutrient_id"`
+	NutritionValue   float32 `json:"nutrient_value"`
+	Min              float32 `json:"min"`
+	Max              float32 `json:"max"`
+	DegreesOfFreedom int32   `json:"-"`
+	LowerErrorBound  float32 `json:"-"`
+	UpperErrorBound  float32 `json:"-"`
 	NutrientDefinition
 }
 
 var CreateNutrientTableSQLs = []string{`
   CREATE TABLE nutrients (
-    food_id            TEXT,
-    nutrient_id        TEXT,
+    food_id            integer,
+    nutrient_id        integer,
     nutrient_value     REAL,
     min                REAL,
     max                REAL,
