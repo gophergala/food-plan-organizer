@@ -11,30 +11,38 @@ angular.module('foodPlanOrganizerApp')
 .factory('Recipe', ['$resource', function($resource) {
     return $resource('http://localhost:8080/recipes/', {
       id: '@id'
+    }, {
+      update: {
+        method: 'PUT'
+      }
     });
   }])
 .controller('RecipesCtrl', function($scope, Recipe) {
-  $scope.recipes = Recipe.get();
+  $scope.recipes = Recipe.query();
 
   $scope.deleteRecipe = function(recipeId) {
-    // TODO
+    Recipe.delete({
+      id: recipeId
+    }, function() {
+      $scope.recipes = Recipe.query();
+    });
   };
 })
-.controller('EditRecipeCtrl', function($scope, $routeParams, Recipe) {
-  console.log('EditRecipe');
+.controller('EditRecipeCtrl', function($scope, $routeParams, $location, Recipe) {
   $scope.recipe = Recipe.get({
     id: $routeParams.id
   });
-  $scope.persist = function() {
-    console.log('TODO UPDATE');
+  $scope.submit = function() {
+    Recipe.update($scope.recipe, function() {
+      $location.path('/recipes');
+    });
   };
-  // TODO
 })
-.controller('NewRecipeCtrl', function($scope, Recipe) {
-  console.log('NewRecipe');
+.controller('NewRecipeCtrl', function($scope, $location, Recipe) {
   $scope.recipe = {};
-  $scope.persist = function() {
-    console.log('TODO CREATE');
+  $scope.submit = function() {
+    Recipe.save($scope.recipe, function() {
+      $location.path('/recipes');
+    });
   };
-  // TODO
 });

@@ -1,8 +1,8 @@
-<form class="form-horizontal" role="form" ng-submit="persist(recipe.id)">
+<form class="form-horizontal" role="form" ng-submit="submit()">
   <div class="form-group">
     <label for="inputRecipeName" class="col-sm-2 control-label">Name</label>
     <div class="col-sm-10">
-      <input type="email" class="form-control" id="inputRecipeName" placeholder="recipe name" ng-bind="recipe.name">
+      <input type="text" class="form-control" id="inputRecipeName" placeholder="recipe name" ng-model="recipe.name">
     </div>
   </div>
   <div class="form-group">
@@ -13,7 +13,7 @@
   <div class="form-group">
     <label for="inputRecipeDescription" class="col-sm-2 control-label">Description</label>
     <div class="col-sm-10">
-      <textarea class="form-control" id="inputRecipeDescription" placeholder="recipe preparations, steps" ng-bind="recipe.description" rows="5"></textarea>
+      <textarea class="form-control" id="inputRecipeDescription" placeholder="recipe preparations, steps" ng-model="recipe.description" rows="5"></textarea>
     </div>
   </div>
   <div class="form-group">
