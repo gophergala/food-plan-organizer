@@ -19,6 +19,7 @@ We're using [atom-shell](https://github.com/atom/atom-shell) to wrap parts 2 & 3
 - Makefile to generate atom-shell
 - non-SR27 data storage
 - UI
+- replace custom migrations by sql-migrate
 - Tests
 
 
