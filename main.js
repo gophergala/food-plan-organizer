@@ -41,6 +41,7 @@ app.on('ready', function() {
   });
 
   // and load the index.html of the app.
+  // mainWindow.loadUrl('http://localhost:9000/index.html');
   mainWindow.loadUrl('file://' + __dirname + '/dist/index.html');
 
   // Emitted when the window is closed.
