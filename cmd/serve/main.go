@@ -8,8 +8,10 @@ import (
 	"time"
 
 	_ "github.com/gophergala/food-plan-organizer/_third_party/github.com/mattn/go-sqlite3"
+	"github.com/gophergala/food-plan-organizer/cmd/serve/manage"
 	"github.com/gophergala/food-plan-organizer/cmd/serve/search"
 	"github.com/gophergala/food-plan-organizer/cmd/serve/show"
+	"github.com/gophergala/food-plan-organizer/models"
 )
 
 var (
@@ -21,6 +23,7 @@ func newServer(db *sql.DB) http.Handler {
 	var r = http.NewServeMux()
 	r.Handle("/search/food/", search.NewFoodSearchServer(db))
 	r.Handle("/food/", show.NewFoodShowServer(db))
+	r.Handle("/recipes/", manage.NewRecipeServer(db))
 	return logHandler(jsonHandler(r))
 }
 
@@ -44,6 +47,18 @@ func jsonHandler(next http.Handler) http.HandlerFunc {
 	}
 }
 
+func runTx(tx *sql.DB, sql string) {
+	if _, err := tx.Exec(sql); err != nil {
+		log.Fatalf("Error executing '%v': %v", sql, err)
+	}
+}
+
+func runMigrations(db *sql.DB) {
+	for _, sql := range models.CreateRecipeTableSQLs {
+		runTx(db, sql)
+	}
+}
+
 func main() {
 	flag.Parse()
 
@@ -52,6 +67,8 @@ func main() {
 		log.Fatalf("Failed to open database: %v\n", err)
 	}
 	defer db.Close()
+
+	runMigrations(db)
 
 	log.Printf("Listening on %v", *listen)
 	http.ListenAndServe(*listen, newServer(db))

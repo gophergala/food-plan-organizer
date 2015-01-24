@@ -14,7 +14,7 @@ type searchServer struct {
 	DB *sql.DB
 }
 
-func (s searchServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func (s *searchServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	params, _ := url.ParseQuery(req.URL.RawQuery)
 
 	query, ok := params["q"]
@@ -47,7 +47,7 @@ func (s searchServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 }
 
 func NewFoodSearchServer(db *sql.DB) http.Handler {
-	return searchServer{
+	return &searchServer{
 		DB: db,
 	}
 }
