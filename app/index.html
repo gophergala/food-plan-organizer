@@ -9,52 +9,35 @@
     <!-- build:css(.) styles/vendor.css -->
     <!-- bower:css -->
     <!-- endbower -->
+
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
     <!-- endbuild -->
   </head>
   <body ng-app="foodPlanOrganizerApp">
-    <!--[if lt IE 7]>
-      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-    <![endif]-->
-
-    <!-- Add your site or application content here -->
     <div class="container">
-      <div class="header">
+      <div class="header" ng-controller="NavigationCtrl">
         <ul class="nav nav-pills pull-right">
-          <li class="active"><a ng-href="#">Home</a></li>
-          <li><a ng-href="#/about">About</a></li>
-          <li><a ng-href="#">Contact</a></li>
+          <li ng-class="{true: 'active', false: ''}[activeCtrl == 'CalendarCtrl']">
+            <a ng-href="#/">Calendar</a>
+          </li>
+          <li ng-class="{true: 'active', false: ''}[activeCtrl == 'RecipesCtrl']">
+            <a ng-href="#/recipes">Recipes</a>
+          </li>
+          <li ng-class="{true: 'active', false: ''}[activeCtrl == 'AboutCtrl']">
+            <a ng-href="#/about">About</a>
+          </li>
         </ul>
-        <h3 class="text-muted">foodPlanOrganizer</h3>
+        <h3 class="text-muted">Food Plan Organizer</h3>
       </div>
 
       <div ng-view=""></div>
 
       <div class="footer">
-        <p><span class="glyphicon glyphicon-heart"></span> from the Yeoman team</p>
+        <p><span class="glyphicon glyphicon-heart"></span>ly crafted by Raphael Randschau</p>
       </div>
     </div>
-
-
-    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
-     <script>
-       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-       })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-       ga('create', 'UA-XXXXX-X');
-       ga('send', 'pageview');
-    </script>
-
-    <!-- build:js(.) scripts/oldieshim.js -->
-    <!--[if lt IE 9]>
-    <script src="bower_components/es5-shim/es5-shim.js"></script>
-    <script src="bower_components/json3/lib/json3.js"></script>
-    <![endif]-->
-    <!-- endbuild -->
 
     <!-- build:js(.) scripts/vendor.js -->
     <!-- bower:js -->
@@ -70,10 +53,11 @@
     <!-- endbower -->
     <!-- endbuild -->
 
-        <!-- build:js({.tmp,app}) scripts/scripts.js -->
-        <script src="scripts/app.js"></script>
-        <script src="scripts/controllers/main.js"></script>
-        <script src="scripts/controllers/about.js"></script>
-        <!-- endbuild -->
+    <!-- build:js({.tmp,app}) scripts/scripts.js -->
+    <script src="scripts/app.js"></script>
+    <script src="scripts/controllers/calendar.js"></script>
+    <script src="scripts/controllers/recipes.js"></script>
+    <script src="scripts/controllers/about.js"></script>
+    <!-- endbuild -->
 </body>
 </html>

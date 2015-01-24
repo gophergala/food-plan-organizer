@@ -8,10 +8,10 @@
  * Controller of the foodPlanOrganizerApp
  */
 angular.module('foodPlanOrganizerApp')
-  .controller('MainCtrl', function ($scope) {
-    $scope.awesomeThings = [
-      'HTML5 Boilerplate',
-      'AngularJS',
-      'Karma'
-    ];
-  });
+.controller('RecipesCtrl', function($scope) {
+  $scope.awesomeThings = [
+    'HTML5 Boilerplate',
+    'AngularJS',
+    'Karma'
+  ];
+});
