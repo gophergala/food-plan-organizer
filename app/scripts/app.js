@@ -10,12 +10,10 @@
  */
 angular
 .module('foodPlanOrganizerApp', [
-  'ngAnimate',
   'ngMessages',
   'ngResource',
   'ngRoute',
-  'ngSanitize',
-  'ngTouch'
+  'ngSanitize'
 ])
 .config(function($routeProvider) {
   $routeProvider

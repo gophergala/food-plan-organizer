@@ -8,3 +8,6 @@ database:
 
 server:
 	go run cmd/serve/main.go -database default.db
+
+atom:
+	/Applications/Atom-Shell.app/Contents/MacOS/Atom .

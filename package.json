@@ -2,6 +2,7 @@
   "name": "foodplanorganizer",
   "version": "0.0.0",
   "dependencies": {},
+  "main"    : "main.js",
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-autoprefixer": "^0.7.3",
