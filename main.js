@@ -37,7 +37,10 @@ app.on('ready', function() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1024,
-    height: 786
+    height: 786,
+    'web-preferences': {
+      'web-security': false
+    }
   });
 
   // and load the index.html of the app.
