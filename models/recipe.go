@@ -10,6 +10,7 @@ type Recipe struct {
 type Ingredient struct {
 	ID     int32  `json:"-"`
 	Name   string `json:"name"`
+	Unit   string `json:"unit"`
 	FoodID int32  `json:"food_id"`
 }
 type IngredientUsage struct {
@@ -24,10 +25,12 @@ var CreateRecipeTableSQLs = []string{`
     name           TEXT,
     description    TEXT
   );`,
+	// `DROP TABLE ingredients;`,
 	`CREATE TABLE IF NOT EXISTS ingredients (
     id       integer primary key asc,
     name     text,
-    food_id  integer
+    food_id  integer,
+    unit     text
   );`,
 	`CREATE TABLE IF NOT EXISTS ingredient_usages (
     ingridient_id integer,
