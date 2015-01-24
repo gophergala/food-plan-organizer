@@ -26,10 +26,10 @@
     <div class="container">
       <div class="header" ng-controller="NavigationCtrl">
         <ul class="nav nav-pills pull-right">
-          <li ng-class="{true: 'active', false: ''}[activeCtrl == 'CalendarCtrl']">
+          <li ng-class="{true: 'active', false: ''}[activeCtrl.indexOf('Calendar') !== -1]">
             <a ng-href="#/">Calendar</a>
           </li>
-          <li ng-class="{true: 'active', false: ''}[activeCtrl == 'RecipesCtrl']">
+          <li ng-class="{true: 'active', false: ''}[activeCtrl.indexOf('Recipe') !== -1]">
             <a ng-href="#/recipes">Recipes</a>
           </li>
           <li ng-class="{true: 'active', false: ''}[activeCtrl == 'AboutCtrl']">
@@ -59,6 +59,7 @@
     <script src="bower_components/angular-resource/angular-resource.js"></script>
     <script src="bower_components/angular-route/angular-route.js"></script>
     <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="bower_components/angucomplete/angucomplete.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 

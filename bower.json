@@ -9,7 +9,8 @@
     "angular-messages": "^1.3.0",
     "angular-resource": "^1.3.0",
     "angular-route": "^1.3.0",
-    "angular-sanitize": "^1.3.0"
+    "angular-sanitize": "^1.3.0",
+    "angucomplete": "*"
   },
   "devDependencies": {
     "angular-mocks": "~1.3.0",

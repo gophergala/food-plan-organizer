@@ -1,22 +1,22 @@
 package models
 
-import "database/sql"
-
 type Recipe struct {
-	ID          int32  `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          int32        `json:"id"`
+	Name        string       `json:"name"`
+	Description string       `json:"description"`
+	Ingredients []Ingredient `json:"ingredients"`
 }
 type Ingredient struct {
-	ID     int32  `json:"-"`
-	Name   string `json:"name"`
-	Unit   string `json:"unit"`
-	FoodID int32  `json:"food_id"`
-}
-type IngredientUsage struct {
-	IngredientID int32
-	RecipeID     int32
-	Volume       float32
+	ID                  int32   `json:"-"`
+	RecipeID            int32   `json:"-"`
+	FoodID              int32   `json:"food_id"`
+	Unit                string  `json:"unit"`
+	Volume              float32 `json:"volume"`
+	Name                string  `json:"name"`
+	NitrogenFactor      float32 `json:"nitrogen_factor"`
+	ProteinFactor       float32 `json:"protein_factor"`
+	FatFactor           float32 `json:"fat_factor"`
+	CarbonhydrateFactor float32 `json:"carbonhydrate_factor"`
 }
 
 var CreateRecipeTableSQLs = []string{`
@@ -27,21 +27,10 @@ var CreateRecipeTableSQLs = []string{`
   );`,
 	// `DROP TABLE ingredients;`,
 	`CREATE TABLE IF NOT EXISTS ingredients (
-    id       integer primary key asc,
-    name     text,
-    food_id  integer,
-    unit     text
+    id          integer primary key asc,
+    recipe_id   integer,
+    food_id     integer,
+    unit        text,
+    volume      real
   );`,
-	`CREATE TABLE IF NOT EXISTS ingredient_usages (
-    ingridient_id integer,
-    recipe_id     integer,
-    volume        real
-  );`,
-}
-
-func InsertRecipe(r *Recipe, tx *sql.DB) error {
-	if _, err := tx.Exec(`INSERT INTO recipes VALUES ($1,$2,$3);`, r.ID, r.Name, r.Description); err != nil {
-		return err
-	}
-	return nil
 }

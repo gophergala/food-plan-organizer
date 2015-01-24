@@ -31,6 +31,17 @@ func (rs *recipeServer) CreateRecipe(rw http.ResponseWriter, req *http.Request) 
 		return
 	}
 
+	for i, ingredient := range recipe.Ingredients {
+		rs.Exec(`INSERT INTO ingredients (recipe_id, food_id, unit, volume) VALUES ($1,$2,$3,$4)`, recipe.ID, ingredient.FoodID, ingredient.Unit, ingredient.Volume)
+		rs.QueryRow(`SELECT last_insert_rowid() FROM ingredients`).Scan(&recipe.Ingredients[i].ID)
+		rs.QueryRow(`SELECT name, nitrogen_factor, protein_factor, fat_factor, carbonhydrate_factor FROM foods WHERE id = $1`, ingredient.FoodID).Scan(
+			&recipe.Ingredients[i].Name,
+			&recipe.Ingredients[i].NitrogenFactor,
+			&recipe.Ingredients[i].ProteinFactor,
+			&recipe.Ingredients[i].FatFactor,
+			&recipe.Ingredients[i].CarbonhydrateFactor)
+	}
+
 	enc.Encode(recipe)
 }
 
@@ -66,6 +77,7 @@ func (rs *recipeServer) DeleteRecipe(rw http.ResponseWriter, req *http.Request) 
 		return
 	}
 
+	rs.DB.Exec(`DELETE FROM ingredients WHERE recipe_id = $1`, id[0])
 	rs.DB.Exec(`DELETE FROM recipes WHERE id = $1`, id[0])
 }
 
@@ -83,6 +95,29 @@ func (rs *recipeServer) ShowRecipe(rw http.ResponseWriter, req *http.Request) {
 		rw.WriteHeader(http.StatusBadRequest)
 		enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
 		return
+	}
+
+	var rows, err = rs.DB.Query(`SELECT
+			ingredients.unit, ingredients.volume, ingredients.food_id,
+			foods.name, foods.nitrogen_factor, foods.protein_factor, foods.fat_factor, foods.carbonhydrate_factor
+		FROM ingredients
+		INNER JOIN foods ON foods.id = ingredients.food_id
+		WHERE ingredients.recipe_id = $1`, id[0])
+	if err != nil {
+		rw.WriteHeader(http.StatusBadRequest)
+		enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var ing models.Ingredient
+		if err = rows.Scan(&ing.Unit, &ing.Volume, &ing.FoodID, &ing.Name, &ing.NitrogenFactor, &ing.ProteinFactor, &ing.FatFactor, &ing.CarbonhydrateFactor); err != nil {
+			rw.WriteHeader(http.StatusBadRequest)
+			enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
+			return
+		}
+		r.Ingredients = append(r.Ingredients, ing)
 	}
 
 	enc.Encode(r)
@@ -105,11 +140,40 @@ func (rs *recipeServer) UpdateRecipe(rw http.ResponseWriter, req *http.Request) 
 	}
 
 	var enc = json.NewEncoder(rw)
-	if _, err := rs.Exec(`UPDATE recipes SET name = $1, description = $2 WHERE id = $3;`, recipe.Name, recipe.Description, id[0]); err != nil {
+	var tx, _ = rs.Begin()
+	if _, err := tx.Exec(`UPDATE recipes SET name = $1, description = $2 WHERE id = $3;`, recipe.Name, recipe.Description, id[0]); err != nil {
+		tx.Rollback()
 		rw.WriteHeader(http.StatusBadRequest)
 		enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
 		return
 	}
+
+	if _, err := tx.Exec(`DELETE FROM ingredients WHERE recipe_id = $1`, id[0]); err != nil {
+		tx.Rollback()
+		rw.WriteHeader(http.StatusBadRequest)
+		enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
+		return
+	}
+	for i, ingredient := range recipe.Ingredients {
+		if _, err := tx.Exec(`INSERT INTO ingredients (recipe_id, food_id, unit, volume) VALUES ($1,$2,$3,$4)`, id[0], ingredient.FoodID, ingredient.Unit, ingredient.Volume); err != nil {
+			tx.Rollback()
+			rw.WriteHeader(http.StatusBadRequest)
+			enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
+			return
+		}
+		if err := rs.QueryRow(`SELECT name, nitrogen_factor, protein_factor, fat_factor, carbonhydrate_factor FROM foods WHERE id = $1`, ingredient.FoodID).Scan(
+			&recipe.Ingredients[i].Name,
+			&recipe.Ingredients[i].NitrogenFactor,
+			&recipe.Ingredients[i].ProteinFactor,
+			&recipe.Ingredients[i].FatFactor,
+			&recipe.Ingredients[i].CarbonhydrateFactor); err != nil {
+			tx.Rollback()
+			rw.WriteHeader(http.StatusBadRequest)
+			enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
+			return
+		}
+	}
+	tx.Commit()
 
 	enc.Encode(recipe)
 }

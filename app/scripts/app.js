@@ -13,7 +13,8 @@ angular
   'ngMessages',
   'ngResource',
   'ngRoute',
-  'ngSanitize'
+  'ngSanitize',
+  'angucomplete'
 ])
 .config(function($routeProvider, $resourceProvider) {
   $resourceProvider.defaults.stripTrailingSlashes = false;
