@@ -3,3 +3,7 @@ dist
 .tmp
 .sass-cache
 bower_components
+data/*.txt
+data/*.pdf
+default.db
+*.bak
