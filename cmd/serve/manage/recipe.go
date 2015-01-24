@@ -14,6 +14,23 @@ type recipeServer struct {
 	*sql.DB
 }
 
+func loadNutrients(fID int32, DB *sql.DB) ([]models.Nutrient, error) {
+	var rows, err = DB.Query(`SELECT * FROM nutrients INNER JOIN nutrient_definitions ON nutrient_definitions.nutrient_id = nutrients.nutrient_id WHERE food_id = $1 AND nutrient_value > 0`, fID)
+	if err != nil {
+		return nil, err
+	}
+
+	var nutrients []models.Nutrient
+	var n models.Nutrient
+	for rows.Next() {
+		if n, err = models.ScanNutrient(rows); err != nil {
+			return nil, err
+		}
+		nutrients = append(nutrients, n)
+	}
+	return nutrients, nil
+}
+
 func (rs *recipeServer) CreateRecipe(rw http.ResponseWriter, req *http.Request) {
 	var dec = json.NewDecoder(req.Body)
 	var recipe models.Recipe
@@ -40,6 +57,8 @@ func (rs *recipeServer) CreateRecipe(rw http.ResponseWriter, req *http.Request) 
 			&recipe.Ingredients[i].ProteinFactor,
 			&recipe.Ingredients[i].FatFactor,
 			&recipe.Ingredients[i].CarbonhydrateFactor)
+
+		recipe.Ingredients[i].Nutrients, _ = loadNutrients(ingredient.FoodID, rs.DB)
 	}
 
 	enc.Encode(recipe)
@@ -113,6 +132,11 @@ func (rs *recipeServer) ShowRecipe(rw http.ResponseWriter, req *http.Request) {
 	for rows.Next() {
 		var ing models.Ingredient
 		if err = rows.Scan(&ing.Unit, &ing.Volume, &ing.FoodID, &ing.Name, &ing.NitrogenFactor, &ing.ProteinFactor, &ing.FatFactor, &ing.CarbonhydrateFactor); err != nil {
+			rw.WriteHeader(http.StatusBadRequest)
+			enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
+			return
+		}
+		if ing.Nutrients, err = loadNutrients(ing.FoodID, rs.DB); err != nil {
 			rw.WriteHeader(http.StatusBadRequest)
 			enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
 			return

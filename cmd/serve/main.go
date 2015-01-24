@@ -24,6 +24,7 @@ func newServer(db *sql.DB) http.Handler {
 	r.Handle("/search/food/", search.NewFoodSearchServer(db))
 	r.Handle("/food/", show.NewFoodShowServer(db))
 	r.Handle("/recipes/", manage.NewRecipeServer(db))
+	r.Handle("/nutrients/", show.NewNutrientShowServer(db))
 	return logHandler(jsonHandler(r))
 }
 

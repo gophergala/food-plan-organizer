@@ -3,7 +3,7 @@ package models
 import "database/sql"
 
 type NutrientDefinition struct {
-	NutrientID    int32  `json:"-"`
+	NutrientID    int32  `json:"id"`
 	Units         string `json:"unit"`
 	Tagname       string `json:"tagname"`
 	Description   string `json:"description"`
