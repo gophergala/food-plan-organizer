@@ -2,15 +2,14 @@
   <thead>
     <tr>
       <th>Name</th>
-      <th>Description</th>
-      <th>Actions</th>
+      <th colspan="2">Description</th>
     </tr>
   </thead>
   <tbody>
     <tr ng-repeat="recipe in recipes">
       <td ng-bind="recipe.name"></td>
       <td ng-bind="truncate(recipe.description, 140)"></td>
-      <td>
+      <td class="show-on-hover">
         <a class="btn btn-default btn-sm" ng-href="#/recipes/{{::recipe.id}}/edit"><span class="glyphicon glyphicon-edit"></span></a>
         <a class="btn btn-danger btn-sm" ng-click="deleteRecipe(recipe.id)"><span class="glyphicon glyphicon-remove"></span></a>
       </td>
