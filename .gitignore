@@ -5,5 +5,5 @@ dist
 bower_components
 data/*.txt
 data/*.pdf
-default.db
+*.db
 *.bak

@@ -24,7 +24,8 @@ var ingredientHandling = function ingredientHandling($scope) {
     }
     $scope.recipe.ingredients.push({
       name: ingredient.name,
-      food_id: ingredient.id
+      food_id: ingredient.id,
+      nutrients: []
     });
   });
   $scope.deleteIngredient = function(ingredient) {

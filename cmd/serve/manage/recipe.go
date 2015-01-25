@@ -11,7 +11,8 @@ import (
 )
 
 type recipeServer struct {
-	*sql.DB
+	userDB *sql.DB
+	sr27DB *sql.DB
 }
 
 func loadNutrients(fID int32, DB *sql.DB) ([]models.Nutrient, error) {
@@ -41,24 +42,24 @@ func (rs *recipeServer) CreateRecipe(rw http.ResponseWriter, req *http.Request) 
 	}
 
 	var enc = json.NewEncoder(rw)
-	rs.Exec(`INSERT INTO recipes (name, description) VALUES ($1,$2);`, recipe.Name, recipe.Description)
-	if err := rs.QueryRow(`SELECT last_insert_rowid() FROM recipes`).Scan(&recipe.ID); err != nil {
+	rs.userDB.Exec(`INSERT INTO recipes (name, description) VALUES ($1,$2);`, recipe.Name, recipe.Description)
+	if err := rs.userDB.QueryRow(`SELECT last_insert_rowid() FROM recipes`).Scan(&recipe.ID); err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
 		return
 	}
 
 	for i, ingredient := range recipe.Ingredients {
-		rs.Exec(`INSERT INTO ingredients (recipe_id, food_id, unit, volume) VALUES ($1,$2,$3,$4)`, recipe.ID, ingredient.FoodID, ingredient.Unit, ingredient.Volume)
-		rs.QueryRow(`SELECT last_insert_rowid() FROM ingredients`).Scan(&recipe.Ingredients[i].ID)
-		rs.QueryRow(`SELECT name, nitrogen_factor, protein_factor, fat_factor, carbonhydrate_factor FROM foods WHERE id = $1`, ingredient.FoodID).Scan(
+		rs.userDB.Exec(`INSERT INTO ingredients (recipe_id, food_id, unit, volume) VALUES ($1,$2,$3,$4)`, recipe.ID, ingredient.FoodID, ingredient.Unit, ingredient.Volume)
+		rs.userDB.QueryRow(`SELECT last_insert_rowid() FROM ingredients`).Scan(&recipe.Ingredients[i].ID)
+		rs.sr27DB.QueryRow(`SELECT name, nitrogen_factor, protein_factor, fat_factor, carbonhydrate_factor FROM foods WHERE id = $1`, ingredient.FoodID).Scan(
 			&recipe.Ingredients[i].Name,
 			&recipe.Ingredients[i].NitrogenFactor,
 			&recipe.Ingredients[i].ProteinFactor,
 			&recipe.Ingredients[i].FatFactor,
 			&recipe.Ingredients[i].CarbonhydrateFactor)
 
-		recipe.Ingredients[i].Nutrients, _ = loadNutrients(ingredient.FoodID, rs.DB)
+		recipe.Ingredients[i].Nutrients, _ = loadNutrients(ingredient.FoodID, rs.sr27DB)
 	}
 
 	enc.Encode(recipe)
@@ -67,7 +68,7 @@ func (rs *recipeServer) CreateRecipe(rw http.ResponseWriter, req *http.Request) 
 func (rs *recipeServer) ListRecipes(rw http.ResponseWriter, req *http.Request) {
 	var recipes []models.Recipe
 	var enc = json.NewEncoder(rw)
-	var rows, err = rs.DB.Query(`SELECT * FROM recipes`)
+	var rows, err = rs.userDB.Query(`SELECT * FROM recipes`)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
@@ -96,8 +97,8 @@ func (rs *recipeServer) DeleteRecipe(rw http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	rs.DB.Exec(`DELETE FROM ingredients WHERE recipe_id = $1`, id[0])
-	rs.DB.Exec(`DELETE FROM recipes WHERE id = $1`, id[0])
+	rs.userDB.Exec(`DELETE FROM ingredients WHERE recipe_id = $1`, id[0])
+	rs.userDB.Exec(`DELETE FROM recipes WHERE id = $1`, id[0])
 }
 
 func (rs *recipeServer) ShowRecipe(rw http.ResponseWriter, req *http.Request) {
@@ -110,18 +111,13 @@ func (rs *recipeServer) ShowRecipe(rw http.ResponseWriter, req *http.Request) {
 
 	var r models.Recipe
 	var enc = json.NewEncoder(rw)
-	if err := rs.DB.QueryRow(`SELECT * FROM recipes WHERE id = $1`, id[0]).Scan(&r.ID, &r.Name, &r.Description); err != nil {
+	if err := rs.userDB.QueryRow(`SELECT * FROM recipes WHERE id = $1`, id[0]).Scan(&r.ID, &r.Name, &r.Description); err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
 		return
 	}
 
-	var rows, err = rs.DB.Query(`SELECT
-			ingredients.unit, ingredients.volume, ingredients.food_id,
-			foods.name, foods.nitrogen_factor, foods.protein_factor, foods.fat_factor, foods.carbonhydrate_factor
-		FROM ingredients
-		INNER JOIN foods ON foods.id = ingredients.food_id
-		WHERE ingredients.recipe_id = $1`, id[0])
+	var rows, err = rs.userDB.Query(`SELECT ingredients.unit, ingredients.volume, ingredients.food_id FROM ingredients WHERE ingredients.recipe_id = $1`, id[0])
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
@@ -131,12 +127,17 @@ func (rs *recipeServer) ShowRecipe(rw http.ResponseWriter, req *http.Request) {
 
 	for rows.Next() {
 		var ing models.Ingredient
-		if err = rows.Scan(&ing.Unit, &ing.Volume, &ing.FoodID, &ing.Name, &ing.NitrogenFactor, &ing.ProteinFactor, &ing.FatFactor, &ing.CarbonhydrateFactor); err != nil {
+		if err = rows.Scan(&ing.Unit, &ing.Volume, &ing.FoodID); err != nil {
 			rw.WriteHeader(http.StatusBadRequest)
 			enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
 			return
 		}
-		if ing.Nutrients, err = loadNutrients(ing.FoodID, rs.DB); err != nil {
+		if err = rs.sr27DB.QueryRow(`SELECT name, nitrogen_factor, protein_factor, fat_factor, carbonhydrate_factor FROM foods WHERE id = $1`, ing.FoodID).Scan(&ing.Name, &ing.NitrogenFactor, &ing.ProteinFactor, &ing.FatFactor, &ing.CarbonhydrateFactor); err != nil {
+			rw.WriteHeader(http.StatusBadRequest)
+			enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
+			return
+		}
+		if ing.Nutrients, err = loadNutrients(ing.FoodID, rs.sr27DB); err != nil {
 			rw.WriteHeader(http.StatusBadRequest)
 			enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
 			return
@@ -164,7 +165,7 @@ func (rs *recipeServer) UpdateRecipe(rw http.ResponseWriter, req *http.Request) 
 	}
 
 	var enc = json.NewEncoder(rw)
-	var tx, _ = rs.Begin()
+	var tx, _ = rs.userDB.Begin()
 	if _, err := tx.Exec(`UPDATE recipes SET name = $1, description = $2 WHERE id = $3;`, recipe.Name, recipe.Description, id[0]); err != nil {
 		tx.Rollback()
 		rw.WriteHeader(http.StatusBadRequest)
@@ -185,7 +186,7 @@ func (rs *recipeServer) UpdateRecipe(rw http.ResponseWriter, req *http.Request) 
 			enc.Encode(map[string]string{"sql_error": fmt.Sprintf("%v", err)})
 			return
 		}
-		if err := rs.QueryRow(`SELECT name, nitrogen_factor, protein_factor, fat_factor, carbonhydrate_factor FROM foods WHERE id = $1`, ingredient.FoodID).Scan(
+		if err := rs.sr27DB.QueryRow(`SELECT name, nitrogen_factor, protein_factor, fat_factor, carbonhydrate_factor FROM foods WHERE id = $1`, ingredient.FoodID).Scan(
 			&recipe.Ingredients[i].Name,
 			&recipe.Ingredients[i].NitrogenFactor,
 			&recipe.Ingredients[i].ProteinFactor,
@@ -220,6 +221,6 @@ func (rs *recipeServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func NewRecipeServer(DB *sql.DB) http.Handler {
-	return &recipeServer{DB}
+func NewRecipeServer(userDB, sr27DB *sql.DB) http.Handler {
+	return &recipeServer{userDB, sr27DB}
 }

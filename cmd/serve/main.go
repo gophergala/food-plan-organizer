@@ -15,16 +15,19 @@ import (
 )
 
 var (
-	listen   = flag.String("listen", ":8080", "Port to listen on")
-	database = flag.String("database", "default.db", "QL Database name")
+	listen           = flag.String("listen", ":8080", "Port to listen on")
+	sr27DatabaseName = flag.String("sr27.database", "sr27.db", "SR27 Sqlite database name")
+	userDatabaseName = flag.String("user.database", "user.db", "Recipe database name")
+	sr27Database     *sql.DB
+	userDatabase     *sql.DB
 )
 
-func newServer(db *sql.DB) http.Handler {
+func newServer() http.Handler {
 	var r = http.NewServeMux()
-	r.Handle("/search/food/", search.NewFoodSearchServer(db))
-	r.Handle("/food/", show.NewFoodShowServer(db))
-	r.Handle("/recipes/", manage.NewRecipeServer(db))
-	r.Handle("/nutrients/", show.NewNutrientShowServer(db))
+	r.Handle("/search/food/", search.NewFoodSearchServer(sr27Database))
+	r.Handle("/food/", show.NewFoodShowServer(sr27Database))
+	r.Handle("/recipes/", manage.NewRecipeServer(userDatabase, sr27Database))
+	r.Handle("/nutrients/", show.NewNutrientShowServer(sr27Database))
 	return logHandler(jsonHandler(r))
 }
 
@@ -48,29 +51,28 @@ func jsonHandler(next http.Handler) http.HandlerFunc {
 	}
 }
 
-func runTx(tx *sql.DB, sql string) {
-	if _, err := tx.Exec(sql); err != nil {
-		log.Fatalf("Error executing '%v': %v", sql, err)
-	}
-}
-
-func runMigrations(db *sql.DB) {
+func runUserMigrations() {
 	for _, sql := range models.CreateRecipeTableSQLs {
-		runTx(db, sql)
+		if _, err := userDatabase.Exec(sql); err != nil {
+			log.Fatalf("Error executing '%v': %v", sql, err)
+		}
 	}
 }
 
 func main() {
 	flag.Parse()
 
-	var db, err = sql.Open("sqlite3", *database)
-	if err != nil {
-		log.Fatalf("Failed to open database: %v\n", err)
+	var err error
+	if sr27Database, err = sql.Open("sqlite3", *sr27DatabaseName); err != nil {
+		log.Fatalf("Failed to open sr27 database: %v\n", err)
 	}
-	defer db.Close()
-
-	runMigrations(db)
+	defer sr27Database.Close()
+	if userDatabase, err = sql.Open("sqlite3", *userDatabaseName); err != nil {
+		log.Fatalf("Failed to open sr27 database: %v\n", err)
+	}
+	defer userDatabase.Close()
+	runUserMigrations()
 
 	log.Printf("Listening on %v", *listen)
-	http.ListenAndServe(*listen, newServer(db))
+	http.ListenAndServe(*listen, newServer())
 }
