@@ -29,6 +29,6 @@ var getWeek = function(weekDiff) {
 }
 
 angular.module('foodPlanOrganizerApp')
-.controller('CalendarCtrl', function($scope) {
+.controller('PlanningCtrl', function($scope) {
   $scope.weeks = [getWeek(0), getWeek(1), getWeek(2)];
 });
