@@ -64,7 +64,8 @@
     <div class="col-sm-10">
       <ul>
         <li ng-repeat="nutrient in nutrients">
-          <span ng-bind="nutrient.description"></span>
+          <span ng-bind="::nutrient.description"></span>
+          <span ng-bind="::nutrient.unit"></span>
           ∑ <span ng-bind="totalNutrients(recipe, nutrients, nutrient.id)|number:3"></span>
         </li>
       </ul>

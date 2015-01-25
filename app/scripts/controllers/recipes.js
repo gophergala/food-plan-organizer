@@ -18,7 +18,6 @@ var ingredientHandling = function ingredientHandling($scope, Food) {
     }
   });
   $scope.$on('add.ingredient', function(evt, ingredient) {
-    console.log(ingredient);
     if ($scope.recipe.ingredients === undefined || $scope.recipe.ingredients === null) {
       $scope.recipe.ingredients = [];
     }
@@ -65,8 +64,40 @@ var totalNutrients = function(recipe, nutrients, nutrientId) {
       } else {
         multipler = -1;
       }
+    } else if (ingredient.unit === 'cup') {
+      if (nutrient.unit === 'g') {
+        multipler = ingredient.volume * 292.0;
+      } else if (nutrient.unit === 'mg') {
+        // multipler = ingredient.volume / 1000.0;
+      } else if (nutrient.unit === 'µg') {
+        // multipler = ingredient.volume / 1000.0 / 1000.0;
+      } else {
+        multipler = -1;
+      }
+    } else if (ingredient.unit === 'tbsp') {
+      if (nutrient.unit === 'g') {
+        multipler = ingredient.volume * 18.0;
+      } else if (nutrient.unit === 'mg') {
+        // multipler = ingredient.volume / 1000.0;
+      } else if (nutrient.unit === 'µg') {
+        // multipler = ingredient.volume / 1000.0 / 1000.0;
+      } else {
+        multipler = -1;
+      }
+    } else if (ingredient.unit === 'tsp') {
+      if (nutrient.unit === 'g') {
+        multipler = ingredient.volume * 6.0;
+      } else if (nutrient.unit === 'mg') {
+        // multipler = ingredient.volume / 1000.0;
+      } else if (nutrient.unit === 'µg') {
+        // multipler = ingredient.volume / 1000.0 / 1000.0;
+      } else {
+        multipler = -1;
+      }
+    } else {
+      multipler = -1;
     }
-    // console.log(ingredient);
+
     for (var j = 0; j < ingredient.nutrients.length; j++) {
       var nutrient = ingredient.nutrients[j];
       if (nutrient.id === nutrientId) {
