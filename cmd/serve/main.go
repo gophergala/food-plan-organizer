@@ -8,11 +8,13 @@ import (
 	"time"
 
 	_ "github.com/gophergala/food-plan-organizer/_third_party/github.com/mattn/go-sqlite3"
+	"github.com/gophergala/food-plan-organizer/_third_party/github.com/rubenv/sql-migrate"
 	"github.com/gophergala/food-plan-organizer/cmd/serve/manage"
 	"github.com/gophergala/food-plan-organizer/cmd/serve/search"
 	"github.com/gophergala/food-plan-organizer/cmd/serve/show"
-	"github.com/gophergala/food-plan-organizer/models"
 )
+
+//go:generate go-bindata -pkg main -o bindata.go migrations
 
 var (
 	listen           = flag.String("listen", ":8080", "Port to listen on")
@@ -51,11 +53,17 @@ func jsonHandler(next http.Handler) http.HandlerFunc {
 	}
 }
 
-func runUserMigrations() {
-	for _, sql := range models.CreateRecipeTableSQLs {
-		if _, err := userDatabase.Exec(sql); err != nil {
-			log.Fatalf("Error executing '%v': %v", sql, err)
-		}
+func runMigrations() {
+	migrations := &migrate.AssetMigrationSource{
+		Asset:    Asset,
+		AssetDir: AssetDir,
+		Dir:      "migrations",
+	}
+
+	if n, err := migrate.Exec(userDatabase, "sqlite3", migrations, migrate.Up); err != nil {
+		log.Printf("unable to migrate: %v", err)
+	} else {
+		log.Printf("Applied %d migrations!\n", n)
 	}
 }
 

@@ -4,10 +4,10 @@ download:
 	rm sr27asc.zip
 
 database:
-	go run cmd/parse/main.go -data.dir data -database default.db
+	go run cmd/parse/bindata.go cmd/parse/main.go -data.dir data -database sr27.db
 
 server:
-	go run cmd/serve/main.go -sr27.database sr27.db -user.database user.db
+	go run cmd/serve/bindata.go cmd/serve/main.go -sr27.database sr27.db -user.database user.db
 
 atom:
 	/Applications/Atom-Shell.app/Contents/MacOS/Atom .

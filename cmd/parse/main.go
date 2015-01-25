@@ -8,15 +8,19 @@ import (
 	"os"
 	"path"
 
+	"github.com/gophergala/food-plan-organizer/_third_party/github.com/rubenv/sql-migrate"
 	"github.com/gophergala/food-plan-organizer/_third_party/golang.org/x/text/encoding"
 	"github.com/gophergala/food-plan-organizer/_third_party/golang.org/x/text/encoding/charmap"
 	"github.com/gophergala/food-plan-organizer/_third_party/golang.org/x/text/transform"
+
+	"flag"
 
 	_ "github.com/gophergala/food-plan-organizer/_third_party/github.com/mattn/go-sqlite3"
 	"github.com/gophergala/food-plan-organizer/cmd/parse/etl"
 	"github.com/gophergala/food-plan-organizer/models"
 )
-import "flag"
+
+//go:generate go-bindata -pkg main -o bindata.go migrations
 
 var (
 	dataDirectory = flag.String("data.dir", "", "sr27 data directory")
@@ -225,27 +229,17 @@ func runTx(tx *sql.DB, sql string) {
 
 var db *sql.DB
 
-func setupDB(db *sql.DB) {
-	for _, sql := range models.CreateFoodGroupTableSQLs {
-		runTx(db, sql)
+func runMigrations(db *sql.DB) {
+	migrations := &migrate.AssetMigrationSource{
+		Asset:    Asset,
+		AssetDir: AssetDir,
+		Dir:      "migrations",
 	}
-	for _, sql := range models.CreateFoodTableSQLs {
-		runTx(db, sql)
-	}
-	for _, sql := range models.CreateLanguageDescriptionTableSQLs {
-		runTx(db, sql)
-	}
-	for _, sql := range models.CreateLanguageTableSQLs {
-		runTx(db, sql)
-	}
-	for _, sql := range models.CreateWeightTableSQLs {
-		runTx(db, sql)
-	}
-	for _, sql := range models.CreateNutrientDefinitionTableSQLs {
-		runTx(db, sql)
-	}
-	for _, sql := range models.CreateNutrientTableSQLs {
-		runTx(db, sql)
+
+	if n, err := migrate.Exec(db, "sqlite3", migrations, migrate.Up); err != nil {
+		log.Printf("unable to migrate: %v", err)
+	} else {
+		log.Printf("Applied %d migrations!\n", n)
 	}
 }
 
@@ -274,7 +268,7 @@ func main() {
 	}
 	defer db.Close()
 
-	setupDB(db)
+	runMigrations(db)
 
 	// health check
 	for _, file := range files {
