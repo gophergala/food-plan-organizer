@@ -8,7 +8,7 @@
  * Controller of the foodPlanOrganizerApp
  */
 
-var ingredientHandling = function ingredientHandling($scope) {
+var ingredientHandling = function ingredientHandling($scope, Food) {
   $scope.selectedIngredient = null;
   $scope.recipe.ingredients = [];
   $scope.$watch('selectedIngredient', function(n, o) {
@@ -22,10 +22,14 @@ var ingredientHandling = function ingredientHandling($scope) {
     if ($scope.recipe.ingredients === undefined || $scope.recipe.ingredients === null) {
       $scope.recipe.ingredients = [];
     }
-    $scope.recipe.ingredients.push({
-      name: ingredient.name,
-      food_id: ingredient.id,
-      nutrients: []
+    Food.get({
+      id: ingredient.id
+    }, function(foodData) {
+      $scope.recipe.ingredients.push({
+        name: ingredient.name,
+        food_id: ingredient.id,
+        nutrients: foodData.nutrients
+      });
     });
   });
   $scope.deleteIngredient = function(ingredient) {
@@ -98,13 +102,13 @@ angular.module('foodPlanOrganizerApp')
     });
   };
 })
-.controller('EditRecipeCtrl', function($scope, $routeParams, $location, Recipe, Nutrient) {
+.controller('EditRecipeCtrl', function($scope, $routeParams, $location, Recipe, Nutrient, Food) {
   $scope.recipe = Recipe.get({
     id: $routeParams.id
   });
   $scope.nutrients = Nutrient.query();
   $scope.totalNutrients = totalNutrients;
-  ingredientHandling($scope);
+  ingredientHandling($scope, Food);
 
   $scope.submit = function() {
     Recipe.update($scope.recipe, function() {
@@ -112,11 +116,11 @@ angular.module('foodPlanOrganizerApp')
     });
   };
 })
-.controller('NewRecipeCtrl', function($scope, $location, Recipe, Nutrient) {
+.controller('NewRecipeCtrl', function($scope, $location, Recipe, Nutrient, Food) {
   $scope.recipe = {};
   $scope.nutrients = Nutrient.query();
   $scope.totalNutrients = totalNutrients;
-  ingredientHandling($scope);
+  ingredientHandling($scope, Food);
 
   $scope.submit = function() {
     Recipe.save($scope.recipe, function() {
