@@ -29,7 +29,7 @@ var (
 
 type Handler func(interface{}, *sql.DB)
 
-func InsertFood(f *Food, tx *sql.DB) error {
+func InsertFood(f *models.Food, tx *sql.DB) error {
 	if _, err := tx.Exec(`INSERT INTO foods VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);`, f.ID, f.FoodGroupID, f.Name, f.ShortName, f.CommonName, f.ScientificName, f.NitrogenFactor, f.ProteinFactor, f.FatFactor, f.CarbonhydrateFactor); err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func persistFood(i interface{}, tx *sql.DB) {
 	}
 }
 
-func InsertFoodGroup(fg *FoodGroup, tx *sql.DB) error {
+func InsertFoodGroup(fg *models.FoodGroup, tx *sql.DB) error {
 	if _, err := tx.Exec(`INSERT INTO food_groups VALUES ($1,$2);`, fg.ID, fg.Name); err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func persistFoodGroup(i interface{}, tx *sql.DB) {
 	}
 }
 
-func InsertLanguageDescription(ld *LanguageDescription, tx *sql.DB) error {
+func InsertLanguageDescription(ld *models.LanguageDescription, tx *sql.DB) error {
 	if _, err := tx.Exec(`INSERT INTO language_descriptions VALUES ($1, $2);`, ld.Code, ld.Description); err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func persistLangDescription(i interface{}, tx *sql.DB) {
 	}
 }
 
-func InsertLanguage(l *Language, tx *sql.DB) error {
+func InsertLanguage(l *models.Language, tx *sql.DB) error {
 	if _, err := tx.Exec(`INSERT INTO languages VALUES ($1, $2);`, l.NutrientID, l.FactorCode); err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func persistLang(i interface{}, tx *sql.DB) {
 	}
 }
 
-func InsertWeight(w *Weight, tx *sql.DB) error {
+func InsertWeight(w *models.Weight, tx *sql.DB) error {
 	if _, err := tx.Exec(`INSERT INTO weights VALUES ($1, $2, $3, $4, $5);`, w.NutrientID, w.Seq, w.Amount, w.Description, w.GramWeight); err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func persistWeight(i interface{}, tx *sql.DB) {
 	}
 }
 
-func InsertNutrientDefinition(nd *NutrientDefinition, tx *sql.DB) error {
+func InsertNutrientDefinition(nd *models.NutrientDefinition, tx *sql.DB) error {
 	if _, err := tx.Exec(`INSERT INTO nutrient_definitions VALUES ($1,$2,$3,$4,$5);`, nd.NutrientID, nd.Units, nd.Tagname, nd.Description, nd.DecimalPlaces); err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func persistNutrientDefinitions(i interface{}, tx *sql.DB) {
 	}
 }
 
-func InsertNutrient(n *Nutrient, tx *sql.DB) error {
+func InsertNutrient(n *models.Nutrient, tx *sql.DB) error {
 	if _, err := tx.Exec(`INSERT INTO nutrients VALUES ($1,$2,$3,$4,$5,$6,$7,$8);`, n.FoodID, n.NutrientID, n.NutritionValue, n.Min, n.Max, n.DegreesOfFreedom, n.LowerErrorBound, n.UpperErrorBound); err != nil {
 		return err
 	}

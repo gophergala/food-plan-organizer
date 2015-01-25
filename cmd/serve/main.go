@@ -79,7 +79,7 @@ func main() {
 		log.Fatalf("Failed to open sr27 database: %v\n", err)
 	}
 	defer userDatabase.Close()
-	runUserMigrations()
+	runMigrations()
 
 	log.Printf("Listening on %v", *listen)
 	http.ListenAndServe(*listen, newServer())
