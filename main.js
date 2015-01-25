@@ -1,21 +1,23 @@
 /* globals console */
 'use strict';
-var app = require('app'); // Module to control application life.
-var BrowserWindow = require('browser-window'); // Module to create native browser window.
+var app = require('app');
+var BrowserWindow = require('browser-window');
 
-// Report crashes to our server.
 require('crash-reporter').start();
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the javascript object is GCed.
 var mainWindow = null;
+var backendPort = null;
 
 var exec = require('child_process').exec;
 var child = exec('./main');
 child.stdout.on('data', function(data) {
+  backendPort = data;
   console.log('go: ' + data);
 });
 child.stderr.on('data', function(data) {
+  if (backendPort === null) {
+    backendPort = data.split('Listening on')[1].trim();
+  }
   console.log('go.err: ' + data);
 });
 child.on('close', function(code) {
@@ -33,27 +35,21 @@ app.on('will-quit', function() {
   child.kill();
 });
 
-// This method will be called when atom-shell has done everything
-// initialization and ready for creating browser windows.
 app.on('ready', function() {
-  // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1024,
+    title: 'Food Plan Organizer',
     height: 786,
     'web-preferences': {
       'web-security': false
     }
   });
 
-  // and load the index.html of the app.
-  // mainWindow.loadUrl('http://localhost:9000/index.html');
-  mainWindow.loadUrl('file://' + __dirname + '/dist/index.html');
+  var backendParam = '?backend=' + backendPort;
+  mainWindow.loadUrl('http://localhost:9000/index.html' + backendParam);
+  // mainWindow.loadUrl('file://' + __dirname + '/dist/index.html' + backendParam);
 
-  // Emitted when the window is closed.
   mainWindow.on('closed', function() {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
     mainWindow = null;
   });
 });
