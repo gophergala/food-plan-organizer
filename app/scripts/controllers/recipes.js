@@ -52,50 +52,17 @@ var totalNutrients = function(recipe, nutrients, nutrientId) {
     var ingredient = recipe.ingredients[i];
     var multipler = 1;
 
-    if (ingredient.unit === 'piece') {
-      multipler = ingredient.volume;
-    } else if (ingredient.unit === 'g') {
-      if (nutrient.unit === 'g') {
-        multipler = ingredient.volume;
-      } else if (nutrient.unit === 'mg') {
-        multipler = ingredient.volume / 1000.0;
-      } else if (nutrient.unit === 'µg') {
-        multipler = ingredient.volume / 1000.0 / 1000.0;
-      } else {
-        multipler = -1;
-      }
+    // all values are averages per 100g of editable portion
+    if (ingredient.unit === 'g') {
+      multipler = ingredient.volume / 100.0;
     } else if (ingredient.unit === 'cup') {
-      if (nutrient.unit === 'g') {
-        multipler = ingredient.volume * 292.0;
-      } else if (nutrient.unit === 'mg') {
-        // multipler = ingredient.volume / 1000.0;
-      } else if (nutrient.unit === 'µg') {
-        // multipler = ingredient.volume / 1000.0 / 1000.0;
-      } else {
-        multipler = -1;
-      }
+      multipler = ingredient.volume * 292.0;
     } else if (ingredient.unit === 'tbsp') {
-      if (nutrient.unit === 'g') {
-        multipler = ingredient.volume * 18.0;
-      } else if (nutrient.unit === 'mg') {
-        // multipler = ingredient.volume / 1000.0;
-      } else if (nutrient.unit === 'µg') {
-        // multipler = ingredient.volume / 1000.0 / 1000.0;
-      } else {
-        multipler = -1;
-      }
+      multipler = ingredient.volume * 18.0;
     } else if (ingredient.unit === 'tsp') {
-      if (nutrient.unit === 'g') {
-        multipler = ingredient.volume * 6.0;
-      } else if (nutrient.unit === 'mg') {
-        // multipler = ingredient.volume / 1000.0;
-      } else if (nutrient.unit === 'µg') {
-        // multipler = ingredient.volume / 1000.0 / 1000.0;
-      } else {
-        multipler = -1;
-      }
+      multipler = ingredient.volume * 6.0;
     } else {
-      multipler = -1;
+      multipler = 1;
     }
 
     for (var j = 0; j < ingredient.nutrients.length; j++) {
@@ -138,6 +105,17 @@ angular.module('foodPlanOrganizerApp')
     id: $routeParams.id
   });
   $scope.nutrients = Nutrient.query();
+  $scope.nutrientsById = function(ids) {
+    var nutrients = [];
+    for (var j = 0; j < ids.length; j++) {
+      for (var i = 0; i < $scope.nutrients.length; i++) {
+        if ($scope.nutrients[i].id === ids[j]) {
+          nutrients.push($scope.nutrients[i]);
+        }
+      }
+    }
+    return nutrients;
+  };
   $scope.totalNutrients = totalNutrients;
   ingredientHandling($scope, Food);
 
@@ -150,6 +128,17 @@ angular.module('foodPlanOrganizerApp')
 .controller('NewRecipeCtrl', function($scope, $location, Recipe, Nutrient, Food) {
   $scope.recipe = {};
   $scope.nutrients = Nutrient.query();
+  $scope.nutrientsById = function(ids) {
+    var nutrients = [];
+    for (var j = 0; j < ids.length; j++) {
+      for (var i = 0; i < $scope.nutrients.length; i++) {
+        if ($scope.nutrients[i].id === ids[j]) {
+          nutrients.push($scope.nutrients[i]);
+        }
+      }
+    }
+    return nutrients;
+  };
   $scope.totalNutrients = totalNutrients;
   ingredientHandling($scope, Food);
 
