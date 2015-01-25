@@ -3,6 +3,9 @@
 The Food Plan Organizer helps people who cook often by creating per-week grocery lists, as well as
 creating detailed calory intake overviews.
 
+See the releases for easy-to-use prepacked archives. Note that the current state requires you to have Atom-Shell installed on your machine.
+Detailed instructions are available in the release instructions.
+
 ## Architecture
 
 The application consists of three parts:
@@ -18,12 +21,4 @@ We're using [atom-shell](https://github.com/atom/atom-shell) to wrap parts 2 & 3
 
 - Makefile to generate atom-shell
 - Tests
-
-
-## API Examples
-
-Run `make server` first.
-
-```
-curl "http://127.0.0.1:8080/search/food/?q=Coconut%20Curry"
-```
+- Planning UI
