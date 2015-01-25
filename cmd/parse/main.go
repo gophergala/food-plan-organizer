@@ -29,6 +29,13 @@ var (
 
 type Handler func(interface{}, *sql.DB)
 
+func InsertFood(f *Food, tx *sql.DB) error {
+	if _, err := tx.Exec(`INSERT INTO foods VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);`, f.ID, f.FoodGroupID, f.Name, f.ShortName, f.CommonName, f.ScientificName, f.NitrogenFactor, f.ProteinFactor, f.FatFactor, f.CarbonhydrateFactor); err != nil {
+		return err
+	}
+	return nil
+}
+
 func persistFood(i interface{}, tx *sql.DB) {
 	if fo, ok := i.(etl.Food); ok {
 		var dbFood = models.Food{
@@ -43,12 +50,19 @@ func persistFood(i interface{}, tx *sql.DB) {
 			FatFactor:           fo.FatFactor,
 			CarbonhydrateFactor: fo.CarbohydrateFactor,
 		}
-		if ins := models.InsertFood(&dbFood, tx); ins != nil {
+		if ins := InsertFood(&dbFood, tx); ins != nil {
 			panic(ins)
 		}
 	} else {
 		panic("expected etl.Food")
 	}
+}
+
+func InsertFoodGroup(fg *FoodGroup, tx *sql.DB) error {
+	if _, err := tx.Exec(`INSERT INTO food_groups VALUES ($1,$2);`, fg.ID, fg.Name); err != nil {
+		return err
+	}
+	return nil
 }
 
 func persistFoodGroup(i interface{}, tx *sql.DB) {
@@ -57,12 +71,19 @@ func persistFoodGroup(i interface{}, tx *sql.DB) {
 			ID:   fg.GroupID,
 			Name: fg.Name,
 		}
-		if ins := models.InsertFoodGroup(&dbGroup, tx); ins != nil {
+		if ins := InsertFoodGroup(&dbGroup, tx); ins != nil {
 			panic(ins)
 		}
 	} else {
 		panic("expected etl.FoodGroup")
 	}
+}
+
+func InsertLanguageDescription(ld *LanguageDescription, tx *sql.DB) error {
+	if _, err := tx.Exec(`INSERT INTO language_descriptions VALUES ($1, $2);`, ld.Code, ld.Description); err != nil {
+		return err
+	}
+	return nil
 }
 
 func persistLangDescription(i interface{}, tx *sql.DB) {
@@ -71,12 +92,19 @@ func persistLangDescription(i interface{}, tx *sql.DB) {
 			Code:        ld.FactorCode,
 			Description: ld.Description,
 		}
-		if ins := models.InsertLanguageDescription(&dbLangDesc, tx); ins != nil {
+		if ins := InsertLanguageDescription(&dbLangDesc, tx); ins != nil {
 			panic(ins)
 		}
 	} else {
 		panic("expected etl.LangDescription")
 	}
+}
+
+func InsertLanguage(l *Language, tx *sql.DB) error {
+	if _, err := tx.Exec(`INSERT INTO languages VALUES ($1, $2);`, l.NutrientID, l.FactorCode); err != nil {
+		return err
+	}
+	return nil
 }
 
 func persistLang(i interface{}, tx *sql.DB) {
@@ -85,12 +113,19 @@ func persistLang(i interface{}, tx *sql.DB) {
 			NutrientID: l.NutrientID,
 			FactorCode: l.FactorCode,
 		}
-		if ins := models.InsertLanguage(&dbL, tx); ins != nil {
+		if ins := InsertLanguage(&dbL, tx); ins != nil {
 			panic(ins)
 		}
 	} else {
 		panic("expected etl.Lang")
 	}
+}
+
+func InsertWeight(w *Weight, tx *sql.DB) error {
+	if _, err := tx.Exec(`INSERT INTO weights VALUES ($1, $2, $3, $4, $5);`, w.NutrientID, w.Seq, w.Amount, w.Description, w.GramWeight); err != nil {
+		return err
+	}
+	return nil
 }
 
 func persistWeight(i interface{}, tx *sql.DB) {
@@ -102,12 +137,19 @@ func persistWeight(i interface{}, tx *sql.DB) {
 			Description: w.Description,
 			GramWeight:  w.GramWeight,
 		}
-		if ins := models.InsertWeight(&dbW, tx); ins != nil {
+		if ins := InsertWeight(&dbW, tx); ins != nil {
 			panic(ins)
 		}
 	} else {
 		panic("expected etl.Weight")
 	}
+}
+
+func InsertNutrientDefinition(nd *NutrientDefinition, tx *sql.DB) error {
+	if _, err := tx.Exec(`INSERT INTO nutrient_definitions VALUES ($1,$2,$3,$4,$5);`, nd.NutrientID, nd.Units, nd.Tagname, nd.Description, nd.DecimalPlaces); err != nil {
+		return err
+	}
+	return nil
 }
 
 func persistNutrientDefinitions(i interface{}, tx *sql.DB) {
@@ -119,12 +161,19 @@ func persistNutrientDefinitions(i interface{}, tx *sql.DB) {
 			Description:   nd.Description,
 			DecimalPlaces: nd.DecimalPlaces,
 		}
-		if ins := models.InsertNutrientDefinition(&dbND, tx); ins != nil {
+		if ins := InsertNutrientDefinition(&dbND, tx); ins != nil {
 			panic(ins)
 		}
 	} else {
 		panic("expected etl.NutrientDefinition")
 	}
+}
+
+func InsertNutrient(n *Nutrient, tx *sql.DB) error {
+	if _, err := tx.Exec(`INSERT INTO nutrients VALUES ($1,$2,$3,$4,$5,$6,$7,$8);`, n.FoodID, n.NutrientID, n.NutritionValue, n.Min, n.Max, n.DegreesOfFreedom, n.LowerErrorBound, n.UpperErrorBound); err != nil {
+		return err
+	}
+	return nil
 }
 
 func persistNutrient(i interface{}, tx *sql.DB) {
@@ -139,7 +188,7 @@ func persistNutrient(i interface{}, tx *sql.DB) {
 			LowerErrorBound:  n.LowerErrorBound,
 			UpperErrorBound:  n.UpperErrorBound,
 		}
-		if ins := models.InsertNutrient(&dbN, tx); ins != nil {
+		if ins := InsertNutrient(&dbN, tx); ins != nil {
 			panic(ins)
 		}
 	} else {

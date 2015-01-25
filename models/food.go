@@ -1,7 +1,5 @@
 package models
 
-import "database/sql"
-
 type Food struct {
 	ID                  int32      `json:"id"`
 	FoodGroupID         int32      `json:"-"`
@@ -24,11 +22,4 @@ func ScanFood(s StructScanner) (Food, error) {
 		return f, err
 	}
 	return f, nil
-}
-
-func InsertFood(f *Food, tx *sql.DB) error {
-	if _, err := tx.Exec(`INSERT INTO foods VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);`, f.ID, f.FoodGroupID, f.Name, f.ShortName, f.CommonName, f.ScientificName, f.NitrogenFactor, f.ProteinFactor, f.FatFactor, f.CarbonhydrateFactor); err != nil {
-		return err
-	}
-	return nil
 }
