@@ -17,6 +17,18 @@ The application consists of three parts:
 
 We're using [atom-shell](https://github.com/atom/atom-shell) to wrap parts 2 & 3 in a executable binary.
 
+## Hacking
+
+Assuming you've got go installed:
+
+1. run the ETL process once to generate a sr27 database
+2. run the backend server: `make run_server`
+3. install frontend dependencies `npm install && bower install`
+4. run the frontend `grunt serve`
+5. open the browser and navigate to `http://127.0.0.1:9000`
+
+If you want to develop in the atom-shell you need to uncomment `main.js:47` and comment `main.js:48`
+
 ## TODOs
 
 - Makefile to generate atom-shell
