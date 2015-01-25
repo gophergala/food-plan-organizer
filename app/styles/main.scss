@@ -24,6 +24,13 @@ body {
   padding-right: 15px;
 }
 
+ul.nav li.dropdown:hover > ul.dropdown-menu {
+    display: block;
+}
+ul.dropdown__open-on-hover:hover {
+    display: block;
+}
+
 /* Custom page header */
 .header {
   border-bottom: 1px solid #e5e5e5;

@@ -86,6 +86,9 @@ angular.module('foodPlanOrganizerApp')
 .controller('RecipesCtrl', function($scope, Recipe) {
   $scope.recipes = Recipe.query();
 
+  $scope.truncate = function(string, n) {
+    return string.length > n ? string.substr(0, n - 1) + ' …' : string;
+  };
   $scope.deleteRecipe = function(recipeId) {
     Recipe.delete({
       id: recipeId

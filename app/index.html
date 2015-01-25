@@ -29,8 +29,17 @@
           <li ng-class="{true: 'active', false: ''}[activeCtrl.indexOf('Planning') !== -1]">
             <a ng-href="#/">Planning</a>
           </li>
-          <li ng-class="{true: 'active', false: ''}[activeCtrl.indexOf('Recipe') !== -1]">
-            <a ng-href="#/recipes">Recipes</a>
+          <li>
+          </li>
+          <li role="presentation" class="dropdown dropdown__open-on-hover" ng-class="{true: 'active', false: ''}[activeCtrl.indexOf('Recipe') !== -1]">
+            <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" ng-href="#/recipes">
+              Recipes
+            </a>
+            <ul class="dropdown-menu" role="menu">
+              <li>
+                <a ng-href="#/recipes/new">Add Recipe</a>
+              </li>
+            </ul>
           </li>
           <li ng-class="{true: 'active', false: ''}[activeCtrl == 'AboutCtrl']">
             <a ng-href="#/about">About</a>
